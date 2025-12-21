@@ -9,6 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .status-box { transition: all 0.3s ease; }
     </style>
 </head>
 <body class="hero-gradient min-h-screen flex items-center justify-center p-6">
@@ -22,35 +23,52 @@
             <p id="auth-subtitle" class="text-slate-500 text-sm mt-2 text-center">Please log in to access the GIS Portal</p>
         </div>
 
-        <div id="status-box" class="hidden mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2">
-            <p id="status-message"></p>
+        <div id="status-box" class="hidden mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box">
+            <div class="flex items-start gap-2">
+                <span id="status-icon"></span>
+                <p id="status-message"></p>
+            </div>
             <button id="resend-btn" class="hidden text-xs underline text-left hover:opacity-80">Resend verification email?</button>
         </div>
 
         <form id="auth-form" class="space-y-5">
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
-                <input type="email" id="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900">
+                <input type="email" id="email" required placeholder="name@company.com" 
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900">
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900">
+                <input type="password" id="password" required placeholder="••••••••" 
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900">
             </div>
-            <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg">Sign In</button>
+            
+            <button type="submit" id="submit-btn" 
+                class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-[0.98]">
+                Sign In
+            </button>
         </form>
 
-        <div class="mt-8 text-center">
-            <p class="text-slate-500 text-sm">
+        <div class="mt-8 text-center border-t border-slate-100 pt-6">
+            <p class="text-slate-500 text-sm font-medium">
                 <span id="toggle-text">Don't have an account?</span> 
                 <button id="toggle-btn" class="text-blue-600 font-bold hover:underline ml-1">Create one</button>
             </p>
-            <a href="index.html" class="inline-block mt-6 text-slate-400 text-xs hover:text-slate-600 transition font-bold uppercase tracking-widest">← Back to Homepage</a>
+            <a href="index.html" class="inline-block mt-6 text-slate-400 text-xs hover:text-blue-600 transition font-bold uppercase tracking-widest">
+                ← Back to Homepage
+            </a>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            sendEmailVerification, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCV6Ml1wm4CcJyijkP8RgrHxQaIyGeJ1PI",
@@ -75,20 +93,12 @@
         const authSubtitle = document.getElementById('auth-subtitle');
         
         let isLogin = true;
-        let lastUser = null;
+        let lastUserAttempt = null;
 
-        function showStatus(msg, type = 'error', showResend = false) {
-            statusBox.className = `mb-6 p-4 rounded-xl text-sm font-semibold border ${type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`;
-            statusMessage.innerText = msg;
-            statusBox.classList.remove('hidden');
-            resendBtn.classList.toggle('hidden', !showResend);
-        }
-
-        // CORRECTED TOGGLE LOGIC
-        toggleBtn.addEventListener('click', () => {
+        // UI Helper: Switch between Sign In and Register
+        function toggleAuthMode() {
             isLogin = !isLogin;
-            statusBox.classList.add('hidden'); // Clear errors when switching
-            
+            statusBox.classList.add('hidden');
             if (isLogin) {
                 authTitle.innerText = "Welcome Back";
                 authSubtitle.innerText = "Please log in to access the GIS Portal";
@@ -102,53 +112,86 @@
                 toggleText.innerText = "Already have an account?";
                 toggleBtn.innerText = "Log in";
             }
-        });
+        }
+
+        toggleBtn.addEventListener('click', toggleAuthMode);
+
+        function showUIStatus(msg, type = 'error', showResend = false) {
+            statusBox.className = `mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box ${
+                type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+            }`;
+            statusMessage.innerText = msg;
+            statusBox.classList.remove('hidden');
+            resendBtn.classList.toggle('hidden', !showResend);
+        }
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+
             submitBtn.disabled = true;
             submitBtn.innerText = "Processing...";
             statusBox.classList.add('hidden');
 
             try {
                 if (isLogin) {
+                    // LOGIN LOGIC
                     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    if (!userCredential.user.emailVerified) {
-                        lastUser = userCredential.user;
-                        showStatus("Please verify your email address first.", "error", true);
+                    const user = userCredential.user;
+
+                    if (!user.emailVerified) {
+                        lastUserAttempt = user;
+                        showUIStatus("Email not verified. Check your inbox.", "error", true);
                         await signOut(auth);
-                    } else {
-                        window.location.href = 'index.html';
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Sign In";
+                        return;
                     }
+                    window.location.href = 'index.html';
                 } else {
+                    // REGISTRATION LOGIC
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await sendEmailVerification(userCredential.user);
-                    showStatus("Verification link sent! Check your inbox.", "success");
+                    showUIStatus("Verification link sent! Please verify then login.", "success");
                     await signOut(auth);
                     authForm.reset();
+                    // Optionally switch to login mode automatically
+                    setTimeout(toggleAuthMode, 3000);
                 }
             } catch (error) {
                 let msg = error.message;
-                if (error.code === 'auth/email-already-in-use') {
-                    msg = "This email is already linked to a different account.";
-                } else if (error.code === 'auth/invalid-credential') {
-                    msg = "Invalid email or password.";
+
+                if (isLogin) {
+                    // Custom logic for Sign In failures
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                        msg = "Email not registered. Kindly create an account.";
+                    } else if (error.code === 'auth/wrong-password') {
+                        msg = "Incorrect password. Please try again.";
+                    }
+                } else {
+                    // Custom logic for Sign Up failures
+                    if (error.code === 'auth/email-already-in-use') {
+                        msg = "This email is already linked to a different account. Kindly login.";
+                    } else if (error.code === 'auth/weak-password') {
+                        msg = "Password should be at least 6 characters.";
+                    }
                 }
-                showStatus(msg, "error");
+
+                showUIStatus(msg, "error");
+                submitBtn.disabled = false;
+                submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
             }
-            submitBtn.disabled = false;
-            submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
         });
 
         resendBtn.addEventListener('click', async () => {
-            if (lastUser) {
+            if (lastUserAttempt) {
                 try {
-                    await sendEmailVerification(lastUser);
-                    showStatus("Verification link resent!", "success");
-                } catch(e) {
-                    showStatus("Too many attempts. Try again later.", "error");
+                    await sendEmailVerification(lastUserAttempt);
+                    showUIStatus("A new verification link has been sent!", "success");
+                    resendBtn.classList.add('hidden');
+                } catch (e) {
+                    showUIStatus("Too many requests. Please try again later.", "error");
                 }
             }
         });
