@@ -153,7 +153,7 @@
                 if (isLogin) {
                     // Logic: If Login fails
                     if (error.code === 'auth/user-not-found') {
-                        msg = "Email not registered. Kindly create an account.";
+                        msg = "Invalid email or password. If you don't have an account, kindly register";
                     } else if (error.code === 'auth/wrong-password') {
                         msg = "Incorrect password. Please try again.";
                     } else if (error.code === 'auth/invalid-credential') {
