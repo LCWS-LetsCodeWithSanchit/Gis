@@ -24,10 +24,7 @@
         </div>
 
         <div id="status-box" class="hidden mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box">
-            <div class="flex items-start gap-2">
-                <span id="status-icon"></span>
-                <p id="status-message"></p>
-            </div>
+            <p id="status-message"></p>
             <button id="resend-btn" class="hidden text-xs underline text-left hover:opacity-80">Resend verification email?</button>
         </div>
 
@@ -44,7 +41,7 @@
             </div>
             
             <button type="submit" id="submit-btn" 
-                class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-[0.98]">
+                class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition shadow-lg active:scale-[0.98]">
                 Sign In
             </button>
         </form>
@@ -95,8 +92,16 @@
         let isLogin = true;
         let lastUserAttempt = null;
 
-        // UI Helper: Switch between Sign In and Register
-        function toggleAuthMode() {
+        function showUIStatus(msg, type = 'error', showResend = false) {
+            statusBox.className = `mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box ${
+                type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+            }`;
+            statusMessage.innerText = msg;
+            statusBox.classList.remove('hidden');
+            resendBtn.classList.toggle('hidden', !showResend);
+        }
+
+        toggleBtn.addEventListener('click', () => {
             isLogin = !isLogin;
             statusBox.classList.add('hidden');
             if (isLogin) {
@@ -112,18 +117,7 @@
                 toggleText.innerText = "Already have an account?";
                 toggleBtn.innerText = "Log in";
             }
-        }
-
-        toggleBtn.addEventListener('click', toggleAuthMode);
-
-        function showUIStatus(msg, type = 'error', showResend = false) {
-            statusBox.className = `mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box ${
-                type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
-            }`;
-            statusMessage.innerText = msg;
-            statusBox.classList.remove('hidden');
-            resendBtn.classList.toggle('hidden', !showResend);
-        }
+        });
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -136,12 +130,9 @@
 
             try {
                 if (isLogin) {
-                    // LOGIN LOGIC
                     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-
-                    if (!user.emailVerified) {
-                        lastUserAttempt = user;
+                    if (!userCredential.user.emailVerified) {
+                        lastUserAttempt = userCredential.user;
                         showUIStatus("Email not verified. Check your inbox.", "error", true);
                         await signOut(auth);
                         submitBtn.disabled = false;
@@ -150,27 +141,28 @@
                     }
                     window.location.href = 'index.html';
                 } else {
-                    // REGISTRATION LOGIC
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await sendEmailVerification(userCredential.user);
-                    showUIStatus("Verification link sent! Please verify then login.", "success");
+                    showUIStatus("Account created! Verify your email then login.", "success");
                     await signOut(auth);
                     authForm.reset();
-                    // Optionally switch to login mode automatically
-                    setTimeout(toggleAuthMode, 3000);
                 }
             } catch (error) {
                 let msg = error.message;
 
                 if (isLogin) {
-                    // Custom logic for Sign In failures
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    // Logic: If Login fails
+                    if (error.code === 'auth/user-not-found') {
                         msg = "Email not registered. Kindly create an account.";
                     } else if (error.code === 'auth/wrong-password') {
                         msg = "Incorrect password. Please try again.";
+                    } else if (error.code === 'auth/invalid-credential') {
+                        // This usually triggers if Enumeration Protection is still ON 
+                        // or for general invalid login data.
+                        msg = "Invalid email or password. If you don't have an account, kindly register.";
                     }
                 } else {
-                    // Custom logic for Sign Up failures
+                    // Logic: If Registration fails
                     if (error.code === 'auth/email-already-in-use') {
                         msg = "This email is already linked to a different account. Kindly login.";
                     } else if (error.code === 'auth/weak-password') {
@@ -188,10 +180,10 @@
             if (lastUserAttempt) {
                 try {
                     await sendEmailVerification(lastUserAttempt);
-                    showUIStatus("A new verification link has been sent!", "success");
+                    showUIStatus("Verification link resent!", "success");
                     resendBtn.classList.add('hidden');
                 } catch (e) {
-                    showUIStatus("Too many requests. Please try again later.", "error");
+                    showUIStatus("Too many requests. Try again later.", "error");
                 }
             }
         });
