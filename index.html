@@ -324,4 +324,18 @@
         const btn = document.getElementById('submit-btn');
         const success = document.getElementById('success-msg');
 
-        for
+    form.addEventListener('submit', e => {
+            e.preventDefault();
+            btn.disabled = true; btn.innerHTML = "Sending...";
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    form.classList.add('hidden');
+                    success.classList.remove('hidden');
+                }).catch(error => {
+                    alert('Connection error.');
+                    btn.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>
