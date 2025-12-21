@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoSpatial Technocrats | Expert GIS Consulting</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        #map { height: 450px; width: 100%; z-index: 1; border-radius: 1rem; }
+        .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); }
+
+        /* --- Menu Animation & Backdrop --- */
+        #mobile-menu {
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(-10px);
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #mobile-menu.active {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        #menu-backdrop {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+            backdrop-filter: blur(8px);
+        }
+        #menu-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Stop background scrolling */
+        body.menu-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+
+    <nav class="fixed w-full z-[100] glass border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center relative z-[110]">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg rotate-45 flex items-center justify-center">
+                    <span class="text-white font-bold -rotate-45 text-xs">G</span>
+                </div>
+                <span class="text-lg md:text-xl font-bold tracking-tight uppercase">GEOSPATIAL<span class="text-blue-600"> Technocrats</span></span>
+            </div>
+
+            <div class="hidden md:flex gap-6 font-semibold text-sm items-center">
+                <a href="#services" class="hover:text-blue-600 transition">Services</a>
+                <a href="#faq" class="hover:text-blue-600 transition">FAQ</a>
+                <a href="#contact" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Contact Us</a>
+            </div>
+
+            <button id="menu-btn" class="md:hidden text-slate-900 focus:outline-none p-2 transition-transform active:scale-90">
+                <svg id="menu-icon" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="menu-backdrop" class="fixed inset-0 bg-slate-900/60 z-[100] md:hidden"></div>
+
+        <div id="mobile-menu" class="absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-2xl z-[105] md:hidden">
+            <div class="flex flex-col p-6 gap-4 font-semibold text-lg bg-white">
+                <a href="#services" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">Services</a>
+                <a href="#faq" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">FAQ</a>
+                <a href="#contact" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700 transition">Contact Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-gradient pt-32 pb-20 text-white">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Global GIS Partners</span>
+                <h1 class="text-5xl md:text-6xl font-bold mt-6 mb-6 leading-tight">
+                    Intelligence through <span class="text-blue-400">Spatial Clarity.</span>
+                </h1>
+                <p class="text-slate-400 text-lg mb-8 max-w-lg leading-relaxed">
+                    We provide high-precision spatial analysis, custom web-GIS applications, and data automation to help your business see the bigger picture.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#contact" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Start Your Project</a>
+                    <a href="#services" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-8 py-4 rounded-xl font-bold transition">Our Expertise</a>
+                </div>
+            </div>
+            <div class="relative mt-8 lg:mt-0">
+                <div id="map" class="shadow-2xl border border-slate-700/50"></div>
+                <div class="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 bg-blue-600 p-4 md:p-6 rounded-2xl shadow-xl z-10">
+                    <p class="text-xl md:text-2xl font-bold text-white">100+</p>
+                    <p class="text-[10px] md:text-xs uppercase opacity-80 text-white">Projects Delivered</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-24 max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4 tracking-tight">Specialized GIS Solutions</h2>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto">From multi-criteria suitability analysis to automated cloud mapping, we solve the world's "where" questions.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="group p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-2xl transition-all duration-300">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 transition-colors">
+                    <span class="text-blue-600 group-hover:text-white font-bold">01</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Spatial Data Science</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Advanced geoprocessing, LiDAR analysis, and predictive modeling using Python and ArcPy.</p>
+            </div>
+            <div class="group p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-2xl transition-all duration-300">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 transition-colors">
+                    <span class="text-blue-600 group-hover:text-white font-bold">02</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Web-GIS Dashboards</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Interactive, real-time cloud-based map dashboards that put data directly in your team's hands.</p>
+            </div>
+            <div class="group p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-2xl transition-all duration-300">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 transition-colors">
+                    <span class="text-blue-600 group-hover:text-white font-bold">03</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Remote Sensing</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Multispectral satellite imagery processing for agriculture, environment, and urban growth monitoring.</p>
+            </div>
+        </div>
+    </section>
+<section id="faq" class="py-24 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4 tracking-tight text-slate-900">Frequently Asked Questions</h2>
+            <p class="text-slate-500 text-lg">Detailed insights into our technical GIS workflows and project delivery.</p>
+        </div>
+        
+        <div class="space-y-4">
+            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                    What specific data formats can you process?
+                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                </summary>
+                <div class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                    We work with a wide range of industry-standard formats:
+                    <ul class="list-disc ml-5 mt-2 space-y-1">
+                        <li><strong>Vector:</strong> Shapefiles, GeoJSON, KML, GDB.</li>
+                        <li><strong>Raster:</strong> GeoTIFF, Cloud Optimized GeoTIFF (COG), JPEG2000.</li>
+                        <li><strong>Advanced:</strong> LiDAR (LAS/LAZ), Point Clouds, and CAD drawings.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                    How long does a typical GIS project take?
+                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                </summary>
+                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                    Timelines vary by complexity. Small spatial analysis or static map production typically takes <strong>3-5 business days</strong>. Complex Web-GIS application development or large-scale data automation pipelines can take <strong>3-6 weeks</strong> depending on integration requirements.
+                </p>
+            </details>
+
+            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                    Can you integrate maps into our existing company dashboard?
+                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                </summary>
+                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                    Yes. We specialize in building embeddable components using <strong>Leaflet.js, Mapbox GL JS, or ArcGIS API</strong>. We can build custom React or Vue components that pull data directly from your internal APIs to show real-time spatial updates on your current platform.
+                </p>
+            </details>
+
+            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                    Do you provide satellite imagery or do I need to supply it?
+                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                </summary>
+                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                    We can assist with both. We utilize free open-source imagery (Sentinel-2, Landsat 8/9) for many environmental projects. For high-resolution commercial needs (Maxar, Planet), we facilitate the procurement and handle all atmospheric correction and band math processing.
+                </p>
+            </details>
+        </div>
+    </div>
+</section>
+
+
+    <section id="contact" class="py-20 bg-slate-900">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Request a Technical Quote</h2>
+            <form id="gis-form" class="grid md:grid-cols-2 gap-4 text-left">
+                <input type="text" name="name" placeholder="Name" required class="p-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="email" name="email" placeholder="Email" required class="p-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <select name="service" class="md:col-span-2 p-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="General Inquiry">Select Primary Interest</option>
+                    <option value="Spatial Analysis">Spatial Data Analysis</option>
+                    <option value="Web Dashboard">Web-GIS Development</option>
+                    <option value="Data Automation">Data Pipeline / Automation</option>
+                </select>
+                <textarea name="message" placeholder="Describe your project goals..." rows="4" required class="md:col-span-2 p-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                <button type="submit" id="submit-btn" class="md:col-span-2 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-500/20">
+                    Send to GeoSpatial Technocrats
+                </button>
+            </form>
+            <div id="success-msg" class="hidden bg-green-600 text-white font-bold py-6 rounded-xl mt-4">
+                ✓ Project Brief Logged Successfully!
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 border-t border-slate-100 text-center text-slate-400 text-sm font-medium">
+        <p>© 2025 GeoSpatial Technocrats Consulting.</p>
+    </footer>
+
+<script>
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuBackdrop = document.getElementById('menu-backdrop');
+    const menuIcon = document.getElementById('menu-icon');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    function toggleMenu(forceClose = false) {
+        const isOpen = forceClose ? false : !mobileMenu.classList.contains('active');
+        
+        if (isOpen) {
+            mobileMenu.classList.add('active');
+            menuBackdrop.classList.add('active');
+            document.body.classList.add('menu-open');
+            menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>`;
+        } else {
+            mobileMenu.classList.remove('active');
+            menuBackdrop.classList.remove('active');
+            document.body.classList.remove('menu-open');
+            menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>`;
+        }
+    }
+
+    menuBtn.addEventListener('click', () => toggleMenu());
+    menuBackdrop.addEventListener('click', () => toggleMenu(true));
+    mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(true)));
+
+    // Map
+    const map = L.map('map', { center: [28.595066, 77.03353], zoom: 13, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+    L.marker([28.595066, 77.03353]).addTo(map).bindPopup('<b>Technocrats HQ</b>').openPopup();
+
+    // Form logic
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyLEOHs4moAR8ju9a0UJsDo-i2V8s73-yZ6hFsLIgWFTqS77O3ANqVF_xU_HlBhTwCduQ/exec';
+    const form = document.getElementById('gis-form');
+    const btn = document.getElementById('submit-btn');
+    const success = document.getElementById('success-msg');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        btn.disabled = true; btn.innerHTML = "Sending...";
+        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+            .then(response => {
+                form.classList.add('hidden');
+                success.classList.remove('hidden');
+            }).catch(error => {
+                alert('Connection error.');
+                btn.disabled = false;
+            });
+    });
+</script>
+</body>
+                  </html>
+              
