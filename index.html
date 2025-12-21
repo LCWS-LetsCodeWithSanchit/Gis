@@ -63,7 +63,9 @@
             <div class="hidden md:flex gap-6 font-semibold text-sm items-center">
                 <a href="#services" class="hover:text-blue-600 transition">Services</a>
                 <a href="#faq" class="hover:text-blue-600 transition">FAQ</a>
-                <a href="#contact" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Contact Us</a>
+                <div id="auth-btn-container">
+                    <a href="auth.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Sign In</a>
+                </div>
             </div>
 
             <button id="menu-btn" class="md:hidden text-slate-900 focus:outline-none p-2 transition-transform active:scale-90">
@@ -79,7 +81,9 @@
             <div class="flex flex-col p-6 gap-4 font-semibold text-lg bg-white">
                 <a href="#services" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">Services</a>
                 <a href="#faq" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">FAQ</a>
-                <a href="#contact" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700 transition">Contact Us</a>
+                <div id="auth-btn-container-mob" class="flex flex-col">
+                    <a href="auth.html" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700 transition">Sign In</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -139,61 +143,62 @@
             </div>
         </div>
     </section>
-<section id="faq" class="py-24 bg-slate-50">
-    <div class="max-w-4xl mx-auto px-6">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4 tracking-tight text-slate-900">Frequently Asked Questions</h2>
-            <p class="text-slate-500 text-lg">Detailed insights into our technical GIS workflows and project delivery.</p>
+
+    <section id="faq" class="py-24 bg-slate-50">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 tracking-tight text-slate-900">Frequently Asked Questions</h2>
+                <p class="text-slate-500 text-lg">Detailed insights into our technical GIS workflows and project delivery.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                        What specific data formats can you process?
+                        <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                        We work with a wide range of industry-standard formats:
+                        <ul class="list-disc ml-5 mt-2 space-y-1">
+                            <li><strong>Vector:</strong> Shapefiles, GeoJSON, KML, GDB.</li>
+                            <li><strong>Raster:</strong> GeoTIFF, Cloud Optimized GeoTIFF (COG), JPEG2000.</li>
+                            <li><strong>Advanced:</strong> LiDAR (LAS/LAZ), Point Clouds, and CAD drawings.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                        How long does a typical GIS project take?
+                        <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                        Timelines vary by complexity. Small spatial analysis or static map production typically takes <strong>3-5 business days</strong>. Complex Web-GIS application development or large-scale data automation pipelines can take <strong>3-6 weeks</strong> depending on integration requirements.
+                    </p>
+                </details>
+
+                <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                        Can you integrate maps into our existing company dashboard?
+                        <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                        Yes. We specialize in building embeddable components using <strong>Leaflet.js, Mapbox GL JS, or ArcGIS API</strong>. We can build custom React or Vue components that pull data directly from your internal APIs to show real-time spatial updates on your current platform.
+                    </p>
+                </details>
+
+                <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
+                    <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
+                        Do you provide satellite imagery or do I need to supply it?
+                        <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
+                        We can assist with both. We utilize free open-source imagery (Sentinel-2, Landsat 8/9) for many environmental projects. For high-resolution commercial needs (Maxar, Planet), we facilitate the procurement and handle all atmospheric correction and band math processing.
+                    </p>
+                </details>
+            </div>
         </div>
-        
-        <div class="space-y-4">
-            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
-                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
-                    What specific data formats can you process?
-                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
-                </summary>
-                <div class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
-                    We work with a wide range of industry-standard formats:
-                    <ul class="list-disc ml-5 mt-2 space-y-1">
-                        <li><strong>Vector:</strong> Shapefiles, GeoJSON, KML, GDB.</li>
-                        <li><strong>Raster:</strong> GeoTIFF, Cloud Optimized GeoTIFF (COG), JPEG2000.</li>
-                        <li><strong>Advanced:</strong> LiDAR (LAS/LAZ), Point Clouds, and CAD drawings.</li>
-                    </ul>
-                </div>
-            </details>
-
-            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
-                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
-                    How long does a typical GIS project take?
-                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
-                </summary>
-                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
-                    Timelines vary by complexity. Small spatial analysis or static map production typically takes <strong>3-5 business days</strong>. Complex Web-GIS application development or large-scale data automation pipelines can take <strong>3-6 weeks</strong> depending on integration requirements.
-                </p>
-            </details>
-
-            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
-                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
-                    Can you integrate maps into our existing company dashboard?
-                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
-                </summary>
-                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
-                    Yes. We specialize in building embeddable components using <strong>Leaflet.js, Mapbox GL JS, or ArcGIS API</strong>. We can build custom React or Vue components that pull data directly from your internal APIs to show real-time spatial updates on your current platform.
-                </p>
-            </details>
-
-            <details class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300 open:shadow-md cursor-pointer">
-                <summary class="flex justify-between items-center font-bold text-lg list-none text-slate-800">
-                    Do you provide satellite imagery or do I need to supply it?
-                    <span class="text-blue-600 transition-transform duration-300 group-open:rotate-180">▼</span>
-                </summary>
-                <p class="mt-4 text-slate-600 border-t border-slate-50 pt-4 leading-relaxed">
-                    We can assist with both. We utilize free open-source imagery (Sentinel-2, Landsat 8/9) for many environmental projects. For high-resolution commercial needs (Maxar, Planet), we facilitate the procurement and handle all atmospheric correction and band math processing.
-                </p>
-            </details>
-        </div>
-    </div>
-</section>
+    </section>
 
 
     <section id="contact" class="py-20 bg-slate-900">
@@ -222,6 +227,52 @@
     <footer class="py-12 border-t border-slate-100 text-center text-slate-400 text-sm font-medium">
         <p>© 2025 GeoSpatial Technocrats Consulting.</p>
     </footer>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCV6Ml1wm4CcJyijkP8RgrHxQaIyGeJ1PI",
+        authDomain: "giscon-70ac0.firebaseapp.com",
+        projectId: "giscon-70ac0",
+        storageBucket: "giscon-70ac0.firebasestorage.app",
+        messagingSenderId: "718821248188",
+        appId: "1:718821248188:web:cd9d275c93db68710e94b9",
+        measurementId: "G-2JEZN4K9R3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
+
+    const desktopAuth = document.getElementById('auth-btn-container');
+    const mobileAuth = document.getElementById('auth-btn-container-mob');
+
+onAuthStateChanged(auth, (user) => {
+    // Check if user exists AND if they have verified their email
+    if (user && user.emailVerified) {
+        const username = user.email.split('@')[0];
+        const logoutHTML = `
+            <div class="flex items-center gap-4">
+                <span class="text-slate-600 text-sm hidden lg:block font-bold">HI, ${username.toUpperCase()}</span>
+                <button id="logout-btn" class="bg-red-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg">Logout</button>
+            </div>`;
+        desktopAuth.innerHTML = logoutHTML;
+        mobileAuth.innerHTML = `<button id="logout-btn-mob" class="bg-red-500 text-white py-4 rounded-xl mt-2 font-bold">Logout (${username})</button>`;
+        
+        const handleLogout = () => signOut(auth).then(() => location.reload());
+        document.getElementById('logout-btn').addEventListener('click', handleLogout);
+        document.getElementById('logout-btn-mob').addEventListener('click', handleLogout);
+    } else {
+        // If not verified or not logged in, show the Sign In button
+        desktopAuth.innerHTML = `<a href="auth.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Sign In</a>`;
+        mobileAuth.innerHTML = `<a href="auth.html" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg">Sign In</a>`;
+    }
+});
+
+</script>
 
 <script>
     const menuBtn = document.getElementById('menu-btn');
@@ -275,5 +326,4 @@
     });
 </script>
 </body>
-                  </html>
-              
+</html>
