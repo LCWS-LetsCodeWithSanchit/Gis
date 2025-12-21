@@ -47,9 +47,68 @@
         body.menu-open {
             overflow: hidden;
         }
+
+        /* Prevent content flash before auth check */
+        .invisible-load { visibility: hidden; }
     </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV6Ml1wm4CcJyijkP8RgrHxQaIyGeJ1PI",
+            authDomain: "giscon-70ac0.firebaseapp.com",
+            projectId: "giscon-70ac0",
+            storageBucket: "giscon-70ac0.firebasestorage.app",
+            messagingSenderId: "718821248188",
+            appId: "1:718821248188:web:cd9d275c93db68710e94b9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            const overlay = document.getElementById('loading-overlay');
+            if (user && user.emailVerified) {
+                // SUCCESS: User is logged in and verified
+                document.body.classList.remove('invisible-load');
+                if(overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 500);
+                }
+                
+                // Update Desktop and Mobile Header UI
+                const username = user.email.split('@')[0].toUpperCase();
+                const profileHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-600 text-sm hidden lg:block font-bold">HI, ${username}</span>
+                        <button onclick="window.handleSignOut()" class="bg-red-500 text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-red-600 transition shadow-lg">Logout</button>
+                    </div>`;
+                
+                document.getElementById('auth-btn-container').innerHTML = profileHTML;
+                document.getElementById('auth-btn-container-mob').innerHTML = `
+                    <button onclick="window.handleSignOut()" class="mobile-link bg-red-500 text-white text-center py-4 rounded-xl mt-2 font-bold shadow-lg">Logout (${username})</button>
+                `;
+            } else {
+                // FAILURE: Not logged in, send back to auth page
+                window.location.href = 'auth.html';
+            }
+        });
+
+        window.handleSignOut = () => {
+            signOut(auth).then(() => {
+                window.location.href = 'auth.html';
+            });
+        };
+    </script>
 </head>
-<body class="bg-white text-slate-900">
+<body class="bg-white text-slate-900 invisible-load">
+
+    <div id="loading-overlay" class="fixed inset-0 z-[999] bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-white font-bold tracking-widest text-xs uppercase">Authenticating Portal...</p>
+    </div>
 
     <nav class="fixed w-full z-[100] glass border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center relative z-[110]">
@@ -64,7 +123,7 @@
                 <a href="#services" class="hover:text-blue-600 transition">Services</a>
                 <a href="#faq" class="hover:text-blue-600 transition">FAQ</a>
                 <div id="auth-btn-container">
-                    <a href="auth.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Sign In</a>
+                    <a href="#contact" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Contact Us</a>
                 </div>
             </div>
 
@@ -82,7 +141,7 @@
                 <a href="#services" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">Services</a>
                 <a href="#faq" class="mobile-link py-3 border-b border-slate-50 hover:text-blue-600 transition">FAQ</a>
                 <div id="auth-btn-container-mob" class="flex flex-col">
-                    <a href="auth.html" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700 transition">Sign In</a>
+                    <a href="#contact" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg hover:bg-blue-700 transition">Contact Us</a>
                 </div>
             </div>
         </div>
@@ -200,7 +259,6 @@
         </div>
     </section>
 
-
     <section id="contact" class="py-20 bg-slate-900">
         <div class="max-w-4xl mx-auto px-6 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Request a Technical Quote</h2>
@@ -228,102 +286,42 @@
         <p>© 2025 GeoSpatial Technocrats Consulting.</p>
     </footer>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuBackdrop = document.getElementById('menu-backdrop');
+        const menuIcon = document.getElementById('menu-icon');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCV6Ml1wm4CcJyijkP8RgrHxQaIyGeJ1PI",
-        authDomain: "giscon-70ac0.firebaseapp.com",
-        projectId: "giscon-70ac0",
-        storageBucket: "giscon-70ac0.firebasestorage.app",
-        messagingSenderId: "718821248188",
-        appId: "1:718821248188:web:cd9d275c93db68710e94b9",
-        measurementId: "G-2JEZN4K9R3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const analytics = getAnalytics(app);
-
-    const desktopAuth = document.getElementById('auth-btn-container');
-    const mobileAuth = document.getElementById('auth-btn-container-mob');
-
-onAuthStateChanged(auth, (user) => {
-    // Check if user exists AND if they have verified their email
-    if (user && user.emailVerified) {
-        const username = user.email.split('@')[0];
-        const logoutHTML = `
-            <div class="flex items-center gap-4">
-                <span class="text-slate-600 text-sm hidden lg:block font-bold">HI, ${username.toUpperCase()}</span>
-                <button id="logout-btn" class="bg-red-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg">Logout</button>
-            </div>`;
-        desktopAuth.innerHTML = logoutHTML;
-        mobileAuth.innerHTML = `<button id="logout-btn-mob" class="bg-red-500 text-white py-4 rounded-xl mt-2 font-bold">Logout (${username})</button>`;
-        
-        const handleLogout = () => signOut(auth).then(() => location.reload());
-        document.getElementById('logout-btn').addEventListener('click', handleLogout);
-        document.getElementById('logout-btn-mob').addEventListener('click', handleLogout);
-    } else {
-        // If not verified or not logged in, show the Sign In button
-        desktopAuth.innerHTML = `<a href="auth.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg">Sign In</a>`;
-        mobileAuth.innerHTML = `<a href="auth.html" class="mobile-link bg-blue-600 text-white text-center py-4 rounded-xl mt-2 shadow-lg">Sign In</a>`;
-    }
-});
-
-</script>
-
-<script>
-    const menuBtn = document.getElementById('menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const menuBackdrop = document.getElementById('menu-backdrop');
-    const menuIcon = document.getElementById('menu-icon');
-    const mobileLinks = document.querySelectorAll('.mobile-link');
-
-    function toggleMenu(forceClose = false) {
-        const isOpen = forceClose ? false : !mobileMenu.classList.contains('active');
-        
-        if (isOpen) {
-            mobileMenu.classList.add('active');
-            menuBackdrop.classList.add('active');
-            document.body.classList.add('menu-open');
-            menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>`;
-        } else {
-            mobileMenu.classList.remove('active');
-            menuBackdrop.classList.remove('active');
-            document.body.classList.remove('menu-open');
-            menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>`;
+        function toggleMenu(forceClose = false) {
+            const isOpen = forceClose ? false : !mobileMenu.classList.contains('active');
+            
+            if (isOpen) {
+                mobileMenu.classList.add('active');
+                menuBackdrop.classList.add('active');
+                document.body.classList.add('menu-open');
+                menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>`;
+            } else {
+                mobileMenu.classList.remove('active');
+                menuBackdrop.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                menuIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>`;
+            }
         }
-    }
 
-    menuBtn.addEventListener('click', () => toggleMenu());
-    menuBackdrop.addEventListener('click', () => toggleMenu(true));
-    mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(true)));
+        menuBtn.addEventListener('click', () => toggleMenu());
+        menuBackdrop.addEventListener('click', () => toggleMenu(true));
+        mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(true)));
 
-    // Map
-    const map = L.map('map', { center: [28.595066, 77.03353], zoom: 13, scrollWheelZoom: false });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-    L.marker([28.595066, 77.03353]).addTo(map).bindPopup('<b>Technocrats HQ</b>').openPopup();
+        // Leaflet Map Initialization
+        const map = L.map('map', { center: [28.595066, 77.03353], zoom: 13, scrollWheelZoom: false });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+        L.marker([28.595066, 77.03353]).addTo(map).bindPopup('<b>Technocrats HQ</b>').openPopup();
 
-    // Form logic
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyLEOHs4moAR8ju9a0UJsDo-i2V8s73-yZ6hFsLIgWFTqS77O3ANqVF_xU_HlBhTwCduQ/exec';
-    const form = document.getElementById('gis-form');
-    const btn = document.getElementById('submit-btn');
-    const success = document.getElementById('success-msg');
+        // Form Submission Logic
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyLEOHs4moAR8ju9a0UJsDo-i2V8s73-yZ6hFsLIgWFTqS77O3ANqVF_xU_HlBhTwCduQ/exec';
+        const form = document.getElementById('gis-form');
+        const btn = document.getElementById('submit-btn');
+        const success = document.getElementById('success-msg');
 
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        btn.disabled = true; btn.innerHTML = "Sending...";
-        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-            .then(response => {
-                form.classList.add('hidden');
-                success.classList.remove('hidden');
-            }).catch(error => {
-                alert('Connection error.');
-                btn.disabled = false;
-            });
-    });
-</script>
-</body>
-</html>
+        for
