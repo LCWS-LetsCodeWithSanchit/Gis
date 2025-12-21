@@ -159,15 +159,30 @@
                     submitBtn.innerText = "Register Now";
                 }
             } catch (error) {
-                let msg = error.message;
-                if (error.code === 'auth/invalid-credential') msg = "Invalid email or password.";
-                if (error.code === 'auth/user-not-found') msg = "No account exists with this email.";
-                
-                showUIStatus(msg, "error");
-                submitBtn.disabled = false;
-                submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
-            }
-        });
+    let msg = error.message;
+
+    // Custom wording for existing accounts
+    if (error.code === 'auth/email-already-in-use') {
+        msg = "This email is already linked to a different account.";
+    } 
+    // Custom wording for bad credentials
+    else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        msg = "Invalid email or password.";
+    }
+    // Custom wording for non-existent users
+    else if (error.code === 'auth/user-not-found') {
+        msg = "No account exists with this email.";
+    }
+    // Catch-all for weak passwords
+    else if (error.code === 'auth/weak-password') {
+        msg = "Password should be at least 6 characters.";
+    }
+
+    showUIStatus(msg, "error");
+    submitBtn.disabled = false;
+    submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
+}
+       } );
 
         // Resend Verification Email Logic
         resendBtn.addEventListener('click', async () => {
