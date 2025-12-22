@@ -10,11 +10,13 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .status-box { transition: all 0.3s ease; }
+        /* Hide content until auth check is done to prevent flickering */
+        .auth-card { display: none; }
     </style>
 </head>
 <body class="hero-gradient min-h-screen flex items-center justify-center p-6">
 
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-slate-100">
+    <div id="main-card" class="auth-card w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-slate-100">
         <div class="flex flex-col items-center mb-8">
             <div class="w-12 h-12 bg-blue-600 rounded-xl rotate-45 flex items-center justify-center mb-4 text-white font-bold">
                 <span class="-rotate-45 text-xl">G</span>
@@ -61,6 +63,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { 
             getAuth, 
+            onAuthStateChanged,
             signInWithEmailAndPassword, 
             createUserWithEmailAndPassword, 
             sendEmailVerification, 
@@ -88,9 +91,21 @@
         const toggleText = document.getElementById('toggle-text');
         const authTitle = document.getElementById('auth-title');
         const authSubtitle = document.getElementById('auth-subtitle');
+        const mainCard = document.getElementById('main-card');
         
         let isLogin = true;
         let lastUserAttempt = null;
+
+        // --- NEW: INVERSE GUARD ---
+        // Automatically redirects to index if already logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.emailVerified) {
+                window.location.replace('index.html');
+            } else {
+                // Only show the card if user is definitely logged out
+                mainCard.style.display = 'block';
+            }
+        });
 
         function showUIStatus(msg, type = 'error', showResend = false) {
             statusBox.className = `mb-6 p-4 rounded-xl text-sm font-semibold border flex flex-col gap-2 status-box ${
@@ -139,7 +154,7 @@
                         submitBtn.innerText = "Sign In";
                         return;
                     }
-                    window.location.href = 'index.html';
+                    window.location.replace('index.html');
                 } else {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     await sendEmailVerification(userCredential.user);
@@ -151,18 +166,14 @@
                 let msg = error.message;
 
                 if (isLogin) {
-                    // Logic: If Login fails
                     if (error.code === 'auth/user-not-found') {
-                        msg = "Invalid email or password. If you don't have an account, kindly register";
+                        msg = "Email not registered. Kindly create an account.";
                     } else if (error.code === 'auth/wrong-password') {
                         msg = "Incorrect password. Please try again.";
                     } else if (error.code === 'auth/invalid-credential') {
-                        // This usually triggers if Enumeration Protection is still ON 
-                        // or for general invalid login data.
-                        msg = "Invalid email or password. If you don't have an account, kindly register.";
+                        msg = "Email not registered or incorrect password. Kindly create an account.";
                     }
                 } else {
-                    // Logic: If Registration fails
                     if (error.code === 'auth/email-already-in-use') {
                         msg = "This email is already linked to a different account. Kindly login.";
                     } else if (error.code === 'auth/weak-password') {
