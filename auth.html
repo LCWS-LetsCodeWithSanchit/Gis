@@ -126,63 +126,67 @@
         });
 
         authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-            statusBox.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Processing...";
+    statusBox.classList.add('hidden');
 
-            try {
-                if (isLogin) {
-                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    if (!userCredential.user.emailVerified) {
-                        lastUserAttempt = userCredential.user;
-                        showUIStatus("Email not verified. Check your inbox.", "error", true);
-                        await signOut(auth);
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "Sign In";
-                        return;
-                    }
-                    window.location.replace('index.html');
-                } else {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    await sendEmailVerification(userCredential.user);
-                    showUIStatus("Account created! Verify your email then login.", "success");
-                    await signOut(auth);
-                    authForm.reset();
-                }
-            } catch (error) {
-                let msg = error.message;
-                if (isLogin) {
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                        msg = "Email not registered. Kindly create an account.";
-                    } else if (error.code === 'auth/wrong-password') {
-                        msg = "Incorrect password. Please try again.";
-                    }
-                } else {
-                    if (error.code === 'auth/email-already-in-use') {
-                        msg = "This email is already linked to a different account. Kindly login.";
-                    }
-                }
-                showUIStatus(msg, "error");
+    try {
+        if (isLogin) {
+            // Attempt Login
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+            // Check verification immediately after login
+            if (!userCredential.user.emailVerified) {
+                lastUserAttempt = userCredential.user;
+                showUIStatus("Identity unverified. Please check your inbox for a verification link.", "error", true);
+                
+                // Force sign out so they stay on auth.html
+                await signOut(auth);
                 submitBtn.disabled = false;
-                submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
+                submitBtn.innerText = "Sign In";
+            } else {
+                // If verified, the onAuthStateChanged will handle the redirect
+                window.location.replace('index.html');
             }
-        });
+        } else {
+            // Registration Logic
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(userCredential.user);
+            showUIStatus("Account created! Verify your email then login.", "success");
+            await signOut(auth);
+            authForm.reset();
+            // Switch back to login view
+            toggleBtn.click(); 
+        }
+    } catch (error) {
+        console.error("Auth Error Code:", error.code);
+        let msg = "System error. Please try again later.";
+        
+        // BETTER ERROR MAPPING
+        if (error.code === 'auth/invalid-credential') {
+            msg = "Invalid email or password. Please verify your credentials.";
+        } else if (error.code === 'auth/user-not-found') {
+            msg = "Account not found. Please create an account.";
+        } else if (error.code === 'auth/wrong-password') {
+            msg = "Incorrect password. Access denied.";
+        } else if (error.code === 'auth/email-already-in-use') {
+            msg = "This email is already registered. Try logging in.";
+        } else if (error.code === 'auth/weak-password') {
+            msg = "Password is too weak. Minimum 6 characters.";
+        } else if (error.code === 'auth/too-many-requests') {
+            msg = "Too many failed attempts. Account temporarily locked.";
+        }
 
-        resendBtn.addEventListener('click', async () => {
-            if (lastUserAttempt) {
-                try {
-                    await sendEmailVerification(lastUserAttempt);
-                    showUIStatus("Verification link resent!", "success");
-                    resendBtn.classList.add('hidden');
-                } catch (e) {
-                    showUIStatus("Too many requests. Try again later.", "error");
-                }
-            }
-        });
+        showUIStatus(msg, "error");
+        submitBtn.disabled = false;
+        submitBtn.innerText = isLogin ? "Sign In" : "Register Now";
+    }
+});
+                             
     </script>
 </body>
 </html>
